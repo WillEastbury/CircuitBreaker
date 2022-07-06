@@ -7,7 +7,7 @@ Fear not though, as here is an extensible sample.
 
 ## Sample Libraries, Host, host Config file and test target are provided in the repo.
 
-![Simple Architecture of Will Eastbury's CircuitBreaker](/simplediag.pnG)
+![Simple Architecture of Will Eastbury's CircuitBreaker](/simplediag.png)
 
 The watchdog will kick in to poll the backend service when there are no messages on the bus arriving.
 
