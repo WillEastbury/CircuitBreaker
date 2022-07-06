@@ -21,7 +21,7 @@ namespace CircuitBreaker
                 {
                     services.Configure<ServiceBusSessionProcessorServiceOptions>(hostContext.Configuration.GetSection("ServiceBusProcessor"));
                     services.Configure<HttpCircuitBreakingWatchdogOptions>(hostContext.Configuration.GetSection("HttpWatchdog"));
-                    services.Configure<RingCircuitResultStoreOptions>(hostContext.Configuration.GetSection("HttpWatchdog"));
+                    services.Configure<RingCircuitResultStoreOptions>(hostContext.Configuration.GetSection("RingBuffer"));
                     
                     HttpCircuitBreakingWatchdogOptions optionsSet = services.BuildServiceProvider().GetService<IOptions<HttpCircuitBreakingWatchdogOptions>>().Value;
                     services.AddHttpClient("WatchDogClient").ConfigureHttpClient(client => {client.BaseAddress = new Uri(optionsSet.PollingUrlBase);});
