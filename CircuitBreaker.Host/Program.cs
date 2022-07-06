@@ -23,6 +23,7 @@ namespace CircuitBreaker
                     HttpCircuitBreakingWatchdogOptions optionsSet = services.BuildServiceProvider().GetService<IOptions<HttpCircuitBreakingWatchdogOptions>>().Value;
                     services.AddHttpClient("WatchDogClient").ConfigureHttpClient(client => {client.BaseAddress = new Uri(optionsSet.PollingUrlBase);});
                     services.AddHttpClient("OperationalClient").ConfigureHttpClient(client => {client.BaseAddress = new Uri(optionsSet.OperationsUrlBase);});
+                    services.AddHttpClient("PlainOldClient").ConfigureHttpClient(client => {client.BaseAddress = new Uri(optionsSet.PollingUrlBase);});
 
                     // Add the hosted service
                     services.ConfigureIRequestProviderHostService<HttpCircuitOperations, HttpWatchDogPollingBreaker, RingCircuitResultStore, ServiceBusSessionProcessorService>();
