@@ -7,21 +7,25 @@ Fear not though, as here is an extensible sample.
 
 Sample Libraries, Host, host Config file and test target are provided in the repo.
 
-
+![Simple Architecture](image /simplediag.png "Simple Architecture")
 
 The watchdog will kick in to poll the backend service when there are no messages on the bus arriving.
 
 ----------------------
-If you want a more custom implementation, then inherit from our base classes, or override one of the following interfaces and pass your version into 
+If you want a more custom implementation, then inherit from our base classes which provide a default implementation, or override one of the following interfaces and pass your version into the di startup method in.
 
 services.ConfigureIRequestProviderHostService<>()
 
-- HttpCircuitOperations -- Where the actual requests are crafted through the circuit breaker (convenience to wrap the operations that execute through the breaker, it should be injected into the circuit breaker Instance of IWatchdogBreaker)
-- HttpWatchDogPollingBreaker -- Runs the watchdog and handles management of the breaker's state
-- RingCircuitResultStore -- Is a circular buffer of prior requests and their success or failure, this is used for the watchdog to see if the service is down.
-- ServiceBusSessionProcessorService -- This implements the polling loop for service bus sessions and executes it's transactions pulled from the service bus when the breaker service is up.
+- CircuitBreaker.Http.HttpCircuitOperations -- Where the actual requests are crafted through the circuit breaker (convenience to wrap the operations that execute through the breaker, it should be injected into the circuit breaker Instance of IWatchdogBreaker)
+- CircuitBreaker.Http.HttpWatchDogPollingBreaker -- Runs the watchdog and handles management of the breaker's state
+- CircuitBreaker.Core.RingCircuitResultStore -- Is a circular buffer of prior requests and their success or failure, this is used for the watchdog to see if the service is down.
+- CircuitBreaker.Azure.ServiceBus.ServiceBusSessionProcessorService -- This implements the polling loop for service bus sessions and executes it's transactions pulled from the service bus when the breaker service is up.
 
 To get the service working in any context you will have to inherit from the HttpCircuitOperations base class (If your command path is http(s) anyway) and override these two methods to shape the request, or Implement ICircuitOperations (You will have to do this if you are not sending the final requests over Http(s). 
+
+The default behviour will simply send a ping message to /test on the WatchDogClient (see below) and will send to /Transaction/1234 on the OperationalClient and will forward any messages received from the bus directly to /transaction/1234. This is exactly how the DemoASPNETService app is configured to receive traffic. 
+
+Speaking of the test app. You can simulate failures or pressure by calling the /FailureSim/{ErrorChance}/{TransientChance} endpoint, specifying an integer percentage for error chance and Transient chance respectively, this will set the likelihood of random failures occurring in the service to test your circuit breaker. 
 ---------------------------------------------------------
 
         public virtual async ValueTask<RequestStatusType> ProcessStandardOperationalMessageAsync(string message, string ExtraHeaderInfo)
@@ -44,7 +48,7 @@ In practice you won't need to do this often, as it's probably configurable enoug
 For auth you can specify a token callback in getBearerTokenCallbackAsync to use a custom method to acquire a bearer token and attach it. Signature is Func<string, Task<string>> getBearerTokenCallbackAsync so just give it a method that accepts a string as input and returns a Task<string> to be awaited. If you already have a token, just pass it in via the BearerToken parameter and we will append 'Bearer ' to it. 
 
 If you have some complex unusual success / failure logic, then you can override to additionally specify what you think is transient and what you think is an error.
-public virtual async Task<RequestStatusType> ValidateSuccess(HttpResponseMessage resp)
+    public virtual async Task<RequestStatusType> ValidateSuccess(HttpResponseMessage resp)
 
 You must return a RequestStatusType back for the breaker to know if the method executed successfully. 
 
