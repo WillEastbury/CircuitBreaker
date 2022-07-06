@@ -2,8 +2,7 @@
 
 #### Http based Watchdog that circuit breaks over a Service Bus consumer when the target of the messages on the queue (an http endpoint) is down or degraded to stop messages being deadlettered. 
 
-It appears that executing and trapping a service bus connection based on the availability of a downstream service is not quite as simple as I initially thought. 
-Fear not though, as here is an extensible sample.
+It appears that executing and trapping a service bus connection based on the availability of a downstream service is not quite as simple as I initially thought it might be, fear not though, as here is an extensible sample to help you along the path.
 
 # This code is provided as-is with no warranty of any kind.
 
