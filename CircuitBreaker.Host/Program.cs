@@ -7,12 +7,15 @@ using CircuitBreaker.Extensions;
 using CircuitBreaker.Options;
 using CircuitBreaker.Azure.ServiceBus;
 using CircuitBreaker.Http;
+using CircuitBreaker.Custom.CircuitOperations;
+
 namespace CircuitBreaker
 {
     class Program
     {   
         public static void Main(string[] args)
         {
+           
             IHost ApplicationHost = Host.CreateDefaultBuilder(args)
                 .ConfigureServices((hostContext, services) => 
                 {
@@ -24,12 +27,11 @@ namespace CircuitBreaker
                     services.AddHttpClient("WatchDogClient").ConfigureHttpClient(client => {client.BaseAddress = new Uri(optionsSet.PollingUrlBase);});
                     services.AddHttpClient("OperationalClient").ConfigureHttpClient(client => {client.BaseAddress = new Uri(optionsSet.OperationsUrlBase);});
                     services.AddHttpClient("PlainOldClient").ConfigureHttpClient(client => {client.BaseAddress = new Uri(optionsSet.PollingUrlBase);});
-
+    
                     // Add the hosted service
-                    services.ConfigureIRequestProviderHostService<HttpCircuitOperations, HttpWatchDogPollingBreaker, RingCircuitResultStore, ServiceBusSessionProcessorService>();
-                }
-            ).Build();
-            ApplicationHost.Run();
+                    services.ConfigureIRequestProviderHostService<DemoCustomerCircuitOperations, HttpWatchDogPollingBreaker, RingCircuitResultStore, ServiceBusSessionProcessorService>();
+                    }).Build();
+                    ApplicationHost.Run();
         }
     }
 }

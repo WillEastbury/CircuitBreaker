@@ -55,35 +55,41 @@ internal class Program
            // return response;
         });
 
-         app.MapPost("/transaction/{id}", async ([FromHeader(Name = "X-Extra-HeaderInfo")] string ExtraHeaderInfo, HttpResponse response) =>
+        app.MapPost("/{transaction}/{id}", async ([FromHeader(Name = "X-Extra-HeaderInfo")] string ExtraHeaderInfo, HttpResponse response, string transaction, string id) =>
         {
-            // Generate a random success, transient failure, or failure response based on the failure probability of ErrorChance and TransientChance
-            var random = new Random();
-            var randomNumber = random.Next(0, 100);
-            if (randomNumber < ErrorChance)
-            {
-                response.StatusCode = 500;
-                Console.WriteLine($"Return error - Transaction {ExtraHeaderInfo}");
-                await response.WriteAsync("<!DOCTYPE html><html><head><title>Non Transient Error</title><style>body {background-color: red;}</style></head><body><h2>Uh Oh, Error!</h2></body></html>");
-                await response.CompleteAsync();
-            }
-            else if (randomNumber < ErrorChance + TransientChance)
-            {
-                response.StatusCode = 429;
-                Console.WriteLine($"Return transient error - Transaction {ExtraHeaderInfo}");
-                await response.WriteAsync("<!DOCTYPE html><html><head><title>Transient Error</title><style>body {background-color: yellow;}</style></head><body><h2>Transient Error, Please Retry</h2></body></html>");
-                await response.CompleteAsync();
-            }
-            else
-            {
-                response.StatusCode = 200;
-                Console.WriteLine($"Return success - Transaction {ExtraHeaderInfo}");
-                await response.WriteAsync("<!DOCTYPE html><html><head><title>All OK</title><style>body {background-color: green;}</style></head><body><h2>All is OK </h2></body></html>");
-                await response.CompleteAsync();
-            }
-           // return response;
+            await Dispatch(ExtraHeaderInfo + "/" + transaction + "/" + id, response);
         });
 
         app.Run();
+    }
+
+    private static async Task<HttpResponse> Dispatch(string ExtraHeaderInfo, HttpResponse response)
+    {
+        // Generate a random success, transient failure, or failure response based on the failure probability of ErrorChance and TransientChance
+        var random = new Random();
+        var randomNumber = random.Next(0, 100);
+        if (randomNumber < ErrorChance)
+        {
+            response.StatusCode = 500;
+            Console.WriteLine($"Return error - Transaction {ExtraHeaderInfo}");
+            await response.WriteAsync("<!DOCTYPE html><html><head><title>Non Transient Error</title><style>body {background-color: red;}</style></head><body><h2>Uh Oh, Error!</h2></body></html>");
+            await response.CompleteAsync();
+        }
+        else if (randomNumber < ErrorChance + TransientChance)
+        {
+            response.StatusCode = 429;
+            Console.WriteLine($"Return transient error - Transaction {ExtraHeaderInfo}");
+            await response.WriteAsync("<!DOCTYPE html><html><head><title>Transient Error</title><style>body {background-color: yellow;}</style></head><body><h2>Transient Error, Please Retry</h2></body></html>");
+            await response.CompleteAsync();
+        }
+        else
+        {
+            response.StatusCode = 200;
+            Console.WriteLine($"Return success - Transaction {ExtraHeaderInfo}");
+            await response.WriteAsync("<!DOCTYPE html><html><head><title>All OK</title><style>body {background-color: green;}</style></head><body><h2>All is OK </h2></body></html>");
+            await response.CompleteAsync();
+        }
+
+        return response;
     }
 }

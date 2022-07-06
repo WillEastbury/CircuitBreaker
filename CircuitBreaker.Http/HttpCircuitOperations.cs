@@ -6,7 +6,6 @@ using CircuitBreaker.Core.Interfaces;
 using Microsoft.Extensions.Logging;
 namespace CircuitBreaker.Http
 {
-    // This class is a convenience to wrap the operations that execute through the breaker, it should be injected into the circuit breaker Instance of IWatchdogBreaker
     public class HttpCircuitOperations : ICircuitOperations
     {
         protected ILogger<HttpCircuitOperations> _logger;
@@ -45,14 +44,14 @@ namespace CircuitBreaker.Http
 
         // This method is called when the circuit is opened to pass a request down the pipeline for live transactions
         // The Validate Success Method will be called to determine if the circuit breaker should trip or not.
-        public virtual async ValueTask<RequestStatusType> ProcessStandardOperationalMessageAsync(string message, string ExtraHeaderInfo)
+        public virtual async Task<RequestStatusType> ProcessStandardOperationalMessageAsync(string message, string ExtraHeaderInfo)
         {
             // Decode the payload from the ingress service here and do something with it
             return await FireRequestBehindBreakerAsync("OperationalClient", "/transaction/1234", HttpMethod.Post, message, ExtraHeaderInfo: ExtraHeaderInfo);
         }
 
         // This method is called when the circuit is open to pass synthetic transactions in much the same vein as above.
-        public virtual async ValueTask<RequestStatusType> ProcessSyntheticTestMessageAsync()
+        public virtual async Task<RequestStatusType> ProcessSyntheticTestMessageAsync()
         {
             return await FireRequestBehindBreakerAsync("WatchDogClient", "/test", HttpMethod.Get, "This is a synthetic message", ExtraHeaderInfo: "Test");
         }

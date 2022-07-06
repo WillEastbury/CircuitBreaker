@@ -13,6 +13,12 @@ Fear not though, as here is an extensible sample.
 
 The watchdog will kick in to poll the backend service when there are no messages on the bus arriving.
 
+### TL;DR; You can find a simple implementation example with sample messages in the CircuitBreaker.Host/UsageSample folder
+
+#### The sample messages can be found in the ServiceBusMessageSamples folder off the root and you can use the ServiceBus Explorer tool to send them, do not forget to set the content type properly to application/json.
+
+#### You will of course need to rename appsetting_sample.json to appsettings.json and set the correct values for your base urls as well as provisioning a valid service bus connection string to connect to the bus. 
+
 ----------------------
 ### If you want a more custom implementation, then inherit from our base classes which provide a default implementation, or override one of the following interfaces and pass your version into the di startup method in.
 
@@ -73,9 +79,9 @@ These are :-
 
 --------------------------    
 
-Simples, have fun! and please raise Github Issues if you find anything broken or would like to chat. 
+Simples, have fun and please raise Github Issues if you find anything broken or would like to chat. 
 
-Thanks,
+Thanks for reading!
 Will Eastbury
 
 --------------------------

@@ -9,8 +9,8 @@ namespace CircuitBreaker.Core.Interfaces
     {
         Func<RequestStatusType, ValueTask> ReportStatusBackToBreakerCallback { get; set; }
         ValueTask<HttpRequestMessage> GetPreparedRequestAsync(string tailUri, HttpMethod method,string ContentBody, string BearerToken, Func<string, Task<string>> getBearerTokenCallbackAsync, string ContentType, string Accept, string ExtraHeaderInfo);
-        ValueTask<RequestStatusType> ProcessStandardOperationalMessageAsync(string message, string ExtraHeaderInfo);
-        ValueTask<RequestStatusType> ProcessSyntheticTestMessageAsync();
+        Task<RequestStatusType> ProcessStandardOperationalMessageAsync(string message, string ExtraHeaderInfo);
+        Task<RequestStatusType> ProcessSyntheticTestMessageAsync();
         ValueTask<RequestStatusType> FireRequestBehindBreakerAsync(string NameOfClient, string tailUri, HttpMethod method,string ContentBody, string BearerToken, Func<string, Task<string>> getBearerTokenCallbackAsync, string ContentType, string Accept, string ExtraHeaderInfo);
 
     }

@@ -1,0 +1,7 @@
+{
+   "MessageType" : "PriceUpdate",
+   "EventData" : {
+        "StockCode": "MSFT",
+        "NewListPrice": "400.01"
+   }
+}

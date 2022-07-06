@@ -17,7 +17,7 @@ namespace  CircuitBreaker.Http
         private readonly ILogger<HttpWatchDogPollingBreaker> _logger;
         private SemaphoreSlim SemPeriod = new SemaphoreSlim(1, 1);
         private bool StopRequested = false;
-        public HttpWatchDogPollingBreaker(IOptions<HttpCircuitBreakingWatchdogOptions> PollerOptions,ILogger<HttpWatchDogPollingBreaker> logger, ICircuitOperations circuitOps,ICircuitResultStore circuitHistory)
+        public HttpWatchDogPollingBreaker(IOptions<HttpCircuitBreakingWatchdogOptions> PollerOptions, ILogger<HttpWatchDogPollingBreaker> logger, ICircuitOperations circuitOps,ICircuitResultStore circuitHistory)
         {
             this.httpPollerOptions = PollerOptions.Value;
             this._logger = logger;

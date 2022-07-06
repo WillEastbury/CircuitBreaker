@@ -124,7 +124,7 @@ namespace CircuitBreaker.Azure.ServiceBus
         {
             if (currentRetries < serviceBusConnectionAndProcessorOptions.MaxRetryCount)
             {
-                var req = await poller.ExecuteRequestWithBreakerTracking(sbrm.ToString(), $"Retry {currentRetries}");
+                var req = await poller.ExecuteRequestWithBreakerTracking(sbrm.Body.ToString(), $"Retry {currentRetries}");
                 if(req != RequestStatusType.Success)
                 {
                     // Recursive Retry, incrementing till we hit MaxRetryCount, whilst waiting for the delay (that extends as a multiple of the number of retries)

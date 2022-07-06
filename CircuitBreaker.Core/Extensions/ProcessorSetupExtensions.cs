@@ -9,7 +9,7 @@ namespace CircuitBreaker.Extensions
         public static IServiceCollection ConfigureIRequestProviderHostService<T,U,V,W>(this IServiceCollection services) 
             where T : class, ICircuitOperations 
             where U : class, IWatchDogBreaker
-            where V : class,  ICircuitResultStore
+            where V : class, ICircuitResultStore
             where W : class, IRequestProviderHostService, IHostedService
         {
             services.AddICircuitOperations<T>();

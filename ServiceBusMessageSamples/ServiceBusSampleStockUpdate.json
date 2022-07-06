@@ -1,0 +1,8 @@
+{
+   "MessageType" : "StockUpdate",
+   "EventData" : {
+        "StockCode": "MSFT",
+        "StockLocation": "025234",
+        "NewStockLevel": "100"
+   }
+}
