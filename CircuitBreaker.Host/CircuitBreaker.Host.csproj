@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <AssemblyName>CircuitBreaker.Host</AssemblyName>
+    <OutputType>Exe</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.26" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.26" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.26" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.26" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="3.1.26" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.26" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.26" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CircuitBreaker.Core\CircuitBreaker.Core.csproj" />
+    <ProjectReference Include="..\CircuitBreaker.Http\CircuitBreaker.Http.csproj" />
+    <ProjectReference Include="..\CircuitBreaker.Azure.ServiceBus\CircuitBreaker.Azure.ServiceBus.csproj" />
+  </ItemGroup>
+</Project>

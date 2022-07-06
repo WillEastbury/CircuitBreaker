@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.8.1" />
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="3.1.26" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="3.1.26" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.26" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="3.1.26" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.26" />
+    <PackageReference Include="Microsoft.Extensions.Options" Version="3.1.26" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CircuitBreaker.Core\CircuitBreaker.Core.csproj" />
+  </ItemGroup>
+</Project>
