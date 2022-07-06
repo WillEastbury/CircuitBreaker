@@ -36,7 +36,7 @@ The default behviour will simply send a ping message to /test on the WatchDogCli
 ### Speaking of the test app. You can simulate failures or pressure by calling the /FailureSim/{ErrorChance}/{TransientChance} endpoint, specifying an integer percentage for error chance and Transient chance respectively, this will set the likelihood of random failures occurring in the service to test your circuit breaker. 
 ---------------------------------------------------------
 
-## To derive from CircuitBreaker.Http.HttpCircuitOperations override the following methods:
+## To derive from CircuitBreaker.Http.HttpCircuitOperations override the following methods, look in DemoCustomerCircuitOperations.cs for a real world use case of doing something useful with the message.
 
         public virtual async ValueTask<RequestStatusType> ProcessStandardOperationalMessageAsync(string message, string ExtraHeaderInfo)
         {
@@ -73,8 +73,8 @@ Anything else is a Failure Error.
 ### Http wise, you get three clients injected out of the box via HttpClientFactory that you can use with base URLs but others can happily be added via DI into your host.
 
 These are :- 
-- OperationalClient (BaseUrlSet to PollingUrlBase from the settings file)
-- WatchDogClient (BaseUrlSet to OperationsUrlBase from the settings file)
+- OperationalClient (BaseUrlSet to PollingUrlBase from the settings file), used for normal traffic ootb
+- WatchDogClient (BaseUrlSet to OperationsUrlBase from the settings file), used for synthetic ping traffic ootb
 - PlainOldClient (no base url set).
 
 --------------------------    
