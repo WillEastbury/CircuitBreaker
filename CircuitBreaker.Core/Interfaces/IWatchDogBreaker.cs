@@ -14,6 +14,6 @@ namespace CircuitBreaker.Core.Interfaces
         ICircuitOperations circuitOps { get; }
         ValueTask<RequestStatusType> ExecuteRequestWithBreakerTracking(string message, string ExtraHeaderInfo);
         Task StartWatchDog(CancellationToken cancellationToken);
-        Task StopWatchDog(CancellationToken cancellationToken); 
+
     }
 }

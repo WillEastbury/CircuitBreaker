@@ -11,63 +11,40 @@ using Microsoft.Extensions.Options;
 
 namespace CircuitBreaker.Azure.ServiceBus
 {
-    public class ServiceBusSessionProcessorService : IHostedService, IRequestProviderHostService
+    public class ServiceBusSessionProcessorService : BackgroundService, IHostedService, IRequestProviderHostService
     {   
         private readonly ServiceBusSessionProcessorServiceOptions serviceBusConnectionAndProcessorOptions;
         public IWatchDogBreaker poller {get; private set;} 
         private readonly ILogger<ServiceBusSessionProcessorService> _logger;
-        private bool StopRequested = false;
         private SemaphoreSlim MaxSessionsInParallel = null;
         private Task pollerTask; 
         private ServiceBusClient client = null;
         public ServiceBusSessionProcessorService(IOptions<ServiceBusSessionProcessorServiceOptions> serviceBusConnectionAndProcessorOptions, ILogger<ServiceBusSessionProcessorService> logger, IWatchDogBreaker poller )
         {
+
+            // Create the client
+            // Open The Queue
+            // For each entity
+            // Create a session with the session id set to the entity
+            // Send a stream of messages down *each* session 
+            // close the session
+            // loop
+
+            // Create the client
+            // Open the queue
+            // for each session (parallel multithreaded processing)
+                // Wait for a lock to be available (up to 100 available), block the thread if it is not 
+                // consume a session with the session id set to the session id
+                // process all of the messages for that session id (this entity)
+                // if there are no more messages, close the session and move on to the next session
+                // release the lock and move to the next session
+            // 
+            
             this.serviceBusConnectionAndProcessorOptions = serviceBusConnectionAndProcessorOptions.Value;
             this._logger = logger;
             this.poller = poller;
+
             this.MaxSessionsInParallel = new SemaphoreSlim(serviceBusConnectionAndProcessorOptions.Value.MaxSessionsInParallel, serviceBusConnectionAndProcessorOptions.Value.MaxSessionsInParallel);
-        }
-        public virtual async Task StartAsync(CancellationToken cancellationToken)
-        {
-            // Can we simplify the following code? 
- 
-            client = new ServiceBusClient(serviceBusConnectionAndProcessorOptions.ConnectionString);
-            this.pollerTask = poller.StartWatchDog(cancellationToken);
-
-            while (!cancellationToken.IsCancellationRequested && !StopRequested)
-            {
-                if (this.poller.circuitState != CircuitState.Dead)
-                {
-                    try
-                    {
-                        await using ServiceBusSessionReceiver receiver = await client.AcceptNextSessionAsync(serviceBusConnectionAndProcessorOptions.QueueName, new ServiceBusSessionReceiverOptions(){ PrefetchCount = 10, ReceiveMode = ServiceBusReceiveMode.PeekLock});
-
-                        // Double check the circuit breaker, this could have been a quite long poll and The service might have dropped in the meantime
-                        if (this.poller.circuitState != CircuitState.Dead)
-                        {
-                            try
-                            {
-                                MaxSessionsInParallel.Wait();
-                                await ProcessServiceBusSession(receiver);
-                            }
-                            finally 
-                            {
-                                MaxSessionsInParallel.Release();
-                                await receiver.CloseAsync();
-                            }  
-                        }
-                        else
-                        {
-                            await receiver.CloseAsync();
-                        }
-                    }
-                    catch (ServiceBusException exc) when (exc.Reason == ServiceBusFailureReason.ServiceTimeout)
-                    {
-                        // Nothing to process, swallow the exception and carry on with the loop.
-                    }
-                }
-            }
-            await this.poller.StopWatchDog(CancellationToken.None); 
         }
         private async Task ProcessServiceBusSession(ServiceBusSessionReceiver receiver)
         {
@@ -142,10 +119,53 @@ namespace CircuitBreaker.Azure.ServiceBus
                 return RequestStatusType.Failure;
             }
         }
-        public virtual Task StopAsync(CancellationToken cancellationToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            StopRequested = true; 
-            return Task.CompletedTask;
+            client = new ServiceBusClient(serviceBusConnectionAndProcessorOptions.ConnectionString);
+            this.pollerTask = poller.StartWatchDog(stoppingToken);
+
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                try
+                {
+                    if (this.poller.circuitState != CircuitState.Dead)
+                    {
+                        try
+                        {
+                            await using ServiceBusSessionReceiver receiver = await client.AcceptNextSessionAsync(serviceBusConnectionAndProcessorOptions.QueueName, new ServiceBusSessionReceiverOptions() { PrefetchCount = 10, ReceiveMode = ServiceBusReceiveMode.PeekLock });
+                            // Double check the circuit breaker, this could have been a quite long poll and The service might have dropped in the meantime
+                            if (this.poller.circuitState != CircuitState.Dead)
+                            {
+                                try
+                                {
+                                    // Critical section here - only ever process MaxSessionsInParallel sessions at a time
+                                    MaxSessionsInParallel.Wait();
+                                    await ProcessServiceBusSession(receiver);
+                                }
+                                finally
+                                {
+                                    MaxSessionsInParallel.Release();
+                                    await receiver.CloseAsync();
+                                }
+                            }
+                            else
+                            {
+                                await receiver.CloseAsync();
+                            }
+                        }
+                        catch (ServiceBusException exc) when (exc.Reason == ServiceBusFailureReason.ServiceTimeout)
+                        {
+                            // Nothing to process, swallow the exception and carry on with the loop.
+                        }
+                    }
+                }
+                catch (TaskCanceledException)
+                {
+                    // This is a normal exception, just exit the loop.
+                    _logger.LogError("Shutdown Requested");
+                    break;
+                }
+            }
         }
     }
 }

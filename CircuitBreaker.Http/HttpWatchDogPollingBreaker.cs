@@ -31,17 +31,21 @@ namespace  CircuitBreaker.Http
         }
         public async Task StartWatchDog(CancellationToken cancellationToken)
         {
-            while (!cancellationToken.IsCancellationRequested && !StopRequested)
+            while (!cancellationToken.IsCancellationRequested)
             {
-                await CheckCircuitForTripAsync();
-                await Task.Delay(httpPollerOptions.PollingIntervalMs);
+                try
+                {
+                    await CheckCircuitForTripAsync();
+                    await Task.Delay(httpPollerOptions.PollingIntervalMs);
+                }
+                catch(TaskCanceledException)
+                {
+                    _logger.LogError("Host Shutting Down - Stopping WatchDog");
+                    break;
+                }
             }
         }
-        public Task StopWatchDog(CancellationToken cancellationToken)
-        {
-            StopRequested = true;
-            return Task.CompletedTask;
-        }     
+        
         private async ValueTask CheckCircuitForTripAsync()
         {
             // If the last processed test of the circuit was more than x seconds ago, then fire a test message through the breaker before calculating the status
